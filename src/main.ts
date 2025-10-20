@@ -26,7 +26,7 @@ async function bootstrap() {
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true,
-  });
+  }); 
   
   await app.listen(3001);
   console.log('Server is running on http://localhost:3001');
