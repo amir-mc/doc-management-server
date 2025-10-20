@@ -10,7 +10,8 @@ import {
   UploadedFile,
   ParseIntPipe,
   BadRequestException, 
-  Logger
+  Logger,
+  UseGuards
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -18,14 +19,19 @@ import { extname } from 'path';
 import { ReportCardsService } from './report-cards.service';
 import { CreateReportCardDto } from './dto/create-report-card.dto';
 import { UpdateReportCardDto } from './dto/update-report-card.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
+import { UserRole } from '@prisma/client';
 
 @Controller('report-cards')
+@UseGuards(JwtAuthGuard)
 export class ReportCardsController {
   private readonly logger = new Logger(ReportCardsController.name);
 
   constructor(private readonly reportCardsService: ReportCardsService) {}
 
   @Post()
+  @Roles(UserRole.ADMIN)
   @UseInterceptors(FileInterceptor('file', {
     storage: diskStorage({
       destination: './uploads/report-cards',
@@ -69,6 +75,7 @@ export class ReportCardsController {
 
 
   @Get()
+   @Roles(UserRole.ADMIN)
   findAll() {
     return this.reportCardsService.findAll();
   }
@@ -84,6 +91,7 @@ export class ReportCardsController {
   }
 
   @Patch(':id')
+  @Roles(UserRole.ADMIN)
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateReportCardDto: UpdateReportCardDto,
@@ -92,6 +100,7 @@ export class ReportCardsController {
   }
 
   @Delete(':id')
+    @Roles(UserRole.ADMIN)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.reportCardsService.remove(id);
   }

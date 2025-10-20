@@ -19,6 +19,7 @@ model User {
   firstName     String
   lastName      String
   fatherName    String
+  password      String
   profileImage  String?
   role          UserRole @default(USER)
   createdAt     DateTime @default(now())

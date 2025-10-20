@@ -3,18 +3,34 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRole } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
-    const { role, ...userData } = createUserDto;
+    const { role, password, ...userData } = createUserDto;
+    
+    // هش کردن رمز عبور
+    const hashedPassword = await bcrypt.hash(password, 10);
     
     return this.prisma.user.create({
       data: {
         ...userData,
+        password: hashedPassword,
         role: role || UserRole.USER,
+      },
+      select: {
+        id: true,
+        nationalCode: true,
+        firstName: true,
+        lastName: true,
+        fatherName: true,
+        profileImage: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
   }
@@ -24,12 +40,34 @@ export class UsersService {
       orderBy: {
         createdAt: 'desc',
       },
+      select: {
+        id: true,
+        nationalCode: true,
+        firstName: true,
+        lastName: true,
+        fatherName: true,
+        profileImage: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
   }
 
   async findOne(id: number) {
     const user = await this.prisma.user.findUnique({
       where: { id },
+      select: {
+        id: true,
+        nationalCode: true,
+        firstName: true,
+        lastName: true,
+        fatherName: true,
+        profileImage: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
     
     if (!user) {
@@ -42,9 +80,26 @@ export class UsersService {
   async update(id: number, updateUserDto: UpdateUserDto) {
     await this.findOne(id);
     
+    // اگر رمز عبور آپدیت شده، آن را هش کن
+    let updateData = { ...updateUserDto };
+    if (updateUserDto.password) {
+      updateData.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+    
     return this.prisma.user.update({
       where: { id },
-      data: updateUserDto,
+      data: updateData,
+      select: {
+        id: true,
+        nationalCode: true,
+        firstName: true,
+        lastName: true,
+        fatherName: true,
+        profileImage: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
   }
 
@@ -54,6 +109,17 @@ export class UsersService {
     return this.prisma.user.update({
       where: { id },
       data: { profileImage },
+      select: {
+        id: true,
+        nationalCode: true,
+        firstName: true,
+        lastName: true,
+        fatherName: true,
+        profileImage: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
   }
 
@@ -73,6 +139,15 @@ export class UsersService {
           orderBy: {
             uploadedAt: 'desc',
           },
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                nationalCode: true,
+              },
+            },
+          },
         },
       },
     });
@@ -81,6 +156,15 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    return user;
+    // حذف password از خروجی
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+  }
+
+  // متد برای پیدا کردن کاربر با رمز عبور (برای احراز هویت)
+  async findUserForAuth(nationalCode: string) {
+    return this.prisma.user.findUnique({
+      where: { nationalCode },
+    });
   }
 }

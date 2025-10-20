@@ -1,5 +1,5 @@
 import { UserRole } from '@prisma/client';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
@@ -13,6 +13,10 @@ export class CreateUserDto {
 
   @IsString()
   fatherName: string;
+
+  @IsString()
+  @MinLength(6, { message: 'رمز عبور باید حداقل ۶ کاراکتر باشد' })
+  password: string;
 
   @IsOptional()
   @IsEnum(UserRole)
