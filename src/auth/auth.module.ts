@@ -11,8 +11,8 @@ import { UsersModule } from '../users/users.module';
   imports: [
     PassportModule,
     JwtModule.register({
-      secret: 'school-management-system-super-secure-jwt-key-2024-make-this-very-long-in-production',
-      signOptions: { expiresIn: '24h' },
+      secret: process.env.JWT_SECRET || 'mysecretkey',
+      signOptions: { expiresIn: '7d' },
     }),
     PrismaModule,
     UsersModule,

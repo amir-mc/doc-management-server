@@ -20,12 +20,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ignoreExpiration: false,
       secretOrKey: secret,
     });
+    
   }
+
 
   async validate(payload: any) {
     console.log('JWT Validation - Payload:', payload);
     const user = await this.authService.validateUser(payload);
     console.log('JWT Validation - User found:', !!user);
+    console.log('✅ JWT Payload received:', payload);
     return user;
   }
 }
