@@ -53,6 +53,7 @@ export class UsersController {
     return this.usersService.update(+id, updateUserDto);
   }
 
+
   @Post(':id/profile-image')
   @UseInterceptors(FileInterceptor('image', {
     storage: diskStorage({
