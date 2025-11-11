@@ -22,11 +22,11 @@ async function bootstrap() {
   if (!fs.existsSync(uploadsPath)) {
     console.error('❌ Uploads directory does not exist!');
   } else {
-    console.log('✅ Uploads directory exists');
+   
     
     // لیست پوشه‌های داخل uploads
     const items = fs.readdirSync(uploadsPath);
-    console.log('📁 Items in uploads:', items);
+    
     
     // بررسی پوشه report-cards
     const reportCardsPath = join(uploadsPath, 'report-cards');
